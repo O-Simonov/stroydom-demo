@@ -4,7 +4,7 @@
 
 [Unit]
 Description=STROYDOM Next.js application
-Documentation=file:/opt/stroydom/DEPLOY_VPS.md
+Documentation=file:/opt/stroydom/DEPLOY_BEGET.md
 After=network.target
 
 [Service]

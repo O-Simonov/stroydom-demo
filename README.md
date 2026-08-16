@@ -4,7 +4,7 @@
 
 **Демонстрационный проект для портфолио.** Компания вымышленная, контакты и заявки — тестовые.
 
-Кейс: [`CASE.md`](./CASE.md) · Короткая версия: [`PORTFOLIO.md`](./PORTFOLIO.md) · Деплой: [`DEPLOY_VPS.md`](./DEPLOY_VPS.md) · Спецификация: [`SPEC.md`](./SPEC.md)
+Кейс: [`CASE.md`](./CASE.md) · Короткая версия: [`PORTFOLIO.md`](./PORTFOLIO.md) · Деплой: [`DEPLOY_BEGET.md`](./DEPLOY_BEGET.md), [`DEPLOY_VPS.md`](./DEPLOY_VPS.md) · Спецификация: [`SPEC.md`](./SPEC.md)
 
 ---
 
@@ -154,7 +154,26 @@ npm run db:seed-demo     # создать 6 демо-заявок для скр�
 - конфиг прокси: [`deploy/nginx-stroydom.example.conf`](./deploy/nginx-stroydom.example.conf);
 - миграции в production только через `npx prisma migrate deploy`;
 - база хранится вне каталога приложения — `/var/lib/stroydom/stroydom.db`;
-- полная пошаговая инструкция: [`DEPLOY_VPS.md`](./DEPLOY_VPS.md).
+- общая инструкция для любого Linux VPS: [`DEPLOY_VPS.md`](./DEPLOY_VPS.md);
+- пошаговый проход по Beget Cloud, от создания сервера до HTTPS: [`DEPLOY_BEGET.md`](./DEPLOY_BEGET.md).
+
+## Рабочий процесс обновления
+
+```
+локальная разработка
+      ↓  git commit
+      ↓  git push origin main
+GitHub — O-Simonov/stroydom-demo
+      ↓  git pull --ff-only origin main
+Beget VPS  /opt/stroydom
+      ↓  npm ci
+      ↓  npx prisma migrate deploy
+      ↓  npm run build
+      ↓  systemctl restart stroydom
+проверка /api/health
+```
+
+Перед каждым обновлением на сервере делается backup базы. Подробности — в [`DEPLOY_BEGET.md`](./DEPLOY_BEGET.md).
 
 ## Backup SQLite
 
@@ -186,8 +205,10 @@ sqlite3 /var/lib/stroydom/stroydom.db \
 | ЭТАП 4 — Telegram | готов и реально протестирован |
 | ЭТАП 5 — mini-CRM | готов |
 | ЭТАП 6 — полировка и production preparation | готов |
+| ЭТАП 7 — публикация на GitHub и подготовка к Beget Cloud | готов |
 
-**Реальный deploy на VPS не выполнялся.**
+**Реальный deploy на сервер не выполнялся.** Сервер не создан, домен не подключён, DNS не менялся.
 
-Следующий шаг: публикация на VPS по инструкции [`DEPLOY_VPS.md`](./DEPLOY_VPS.md).  
-Для этого требуются доступ к серверу, домен и решение по Яндекс.Метрике.
+Следующий шаг: публикация на Beget Cloud VPS по инструкции [`DEPLOY_BEGET.md`](./DEPLOY_BEGET.md).  
+Для этого требуются созданный VPS с доступом по SSH, значения Telegram- и CRM-секретов,
+а также решение по домену и Яндекс.Метрике.
