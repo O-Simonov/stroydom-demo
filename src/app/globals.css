@@ -1,0 +1,184 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #141816;
+  --forest: #2f4a3a;
+  --forest-deep: #24382c;
+  --brass: #c4a574;
+  --brass-soft: #d4ba91;
+  --paper: #f7f5f0;
+  --sand: #e7e2d7;
+  --muted: #5d635e;
+  --line: #d8d3c8;
+  --background: var(--paper);
+  --foreground: var(--ink);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(47, 74, 58, 0.06), transparent 28%),
+    linear-gradient(180deg, #f7f5f0 0%, #f3efe6 100%);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-rise {
+  animation: rise 0.9s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .hero-rise {
+    animation: none;
+  }
+
+  .motion-safe-zoom {
+    transition: none !important;
+  }
+
+  .motion-safe-zoom:hover {
+    transform: none !important;
+  }
+}
+
+/* Fixed header offset for in-page anchors */
+#projects,
+#benefits,
+#steps,
+#calculator,
+#gallery,
+#value,
+#contact {
+  scroll-margin-top: 5.5rem;
+}
+
+@media (min-width: 640px) {
+  #projects,
+  #benefits,
+  #steps,
+  #calculator,
+  #gallery,
+  #value,
+  #contact {
+    scroll-margin-top: 6rem;
+  }
+}
+
+.section-pad {
+  padding-block: clamp(4.5rem, 8vw, 7rem);
+}
+
+.eyebrow {
+  margin-bottom: 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--forest);
+}
+
+.section-title {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.85rem, 3.4vw, 2.75rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.section-lead {
+  margin-top: 1rem;
+  max-width: 38rem;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.on-dark .eyebrow {
+  color: var(--brass);
+}
+
+.on-dark .section-title {
+  color: var(--paper);
+}
+
+.on-dark .field-label {
+  color: color-mix(in srgb, var(--paper) 80%, transparent);
+}
+
+.field-input {
+  width: 100%;
+  border-radius: 0.9rem;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--paper) 88%, white);
+  padding: 0.8rem 0.95rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.field-input:focus {
+  border-color: color-mix(in srgb, var(--forest) 55%, var(--line));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--forest) 18%, transparent);
+}
+
+.dark-field {
+  border-color: color-mix(in srgb, var(--paper) 18%, transparent);
+  background: color-mix(in srgb, var(--paper) 8%, transparent);
+  color: var(--paper);
+}
+
+.dark-field option {
+  color: var(--ink);
+}
+
+.dark-field:focus {
+  border-color: color-mix(in srgb, var(--brass) 70%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brass) 22%, transparent);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--forest) 25%, transparent);
+}
+
+/* Honeypot: visually hidden, not type=hidden */
+.hp-field {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}

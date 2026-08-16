@@ -1,0 +1,42 @@
+# systemd unit example for СТРОЙДОМ (Next.js production server)
+# Install as: /etc/systemd/system/stroydom.service
+# No secrets in this file — they live in /opt/stroydom/.env (chmod 600).
+
+[Unit]
+Description=STROYDOM Next.js application
+Documentation=file:/opt/stroydom/DEPLOY_VPS.md
+After=network.target
+
+[Service]
+Type=simple
+User=stroydom
+Group=stroydom
+WorkingDirectory=/opt/stroydom
+
+# Secrets and runtime config (DATABASE_URL, TELEGRAM_*, CRM_*, NEXT_PUBLIC_SITE_URL)
+EnvironmentFile=/opt/stroydom/.env
+Environment=NODE_ENV=production
+
+# Next.js binds to loopback only; Nginx terminates TLS and proxies to it.
+ExecStart=/usr/bin/npm start -- --hostname 127.0.0.1 --port 3000
+
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+# Logs go to journald: journalctl -u stroydom -f
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=stroydom
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+# Application must be able to write the SQLite file
+ReadWritePaths=/var/lib/stroydom
+
+[Install]
+WantedBy=multi-user.target
