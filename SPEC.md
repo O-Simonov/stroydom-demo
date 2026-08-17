@@ -387,7 +387,7 @@ portfolio/project-01-construction/
 
 > Раздел добавлен после ЭТАПА 6. Исходная постановка выше не переписывалась.
 
-**Stage 1–6 completed.** Реальный deploy на VPS не выполнялся.
+**Stage 1–8 completed.** Production: https://stroydom-project.ru (Beget Cloud VPS, HTTPS, mini-CRM).
 
 ### Итоговая функциональность
 

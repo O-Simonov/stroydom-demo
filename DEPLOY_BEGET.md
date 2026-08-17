@@ -17,8 +17,9 @@ SQLite  /var/lib/stroydom/stroydom.db
 Telegram-уведомления + mini-CRM /leads
 ```
 
-> **Статус:** реальный deploy ещё не выполнялся. Сервер не создан, домен не подключён,
-> DNS не менялся. Документ описывает шаги, которые предстоит выполнить.
+> **Статус:** production опубликован.
+> Сайт: [https://stroydom-project.ru](https://stroydom-project.ru)
+> Ниже — как это было сделано и как обновлять.
 
 **Соотношение с другими документами:**
 
@@ -473,3 +474,33 @@ Production-база стартует пустой. Скрипты `npm run db:se
 - не коммитить `.env` и не передавать секреты в репозиторий;
 - не ставить `chmod 777` на каталог базы;
 - не выпускать сертификат для домена, который ещё не указывает на сервер.
+
+---
+
+## 18. Текущее production-состояние
+
+Зафиксировано после публикации. Секреты (Telegram, CRM, `.env`) в репозиторий не входят.
+
+| Параметр | Значение |
+|----------|----------|
+| URL | https://stroydom-project.ru |
+| GitHub | https://github.com/O-Simonov/stroydom-demo |
+| VPS | Beget Cloud, Ubuntu 24.04 LTS |
+| Код | `/opt/stroydom` |
+| База | `/var/lib/stroydom/stroydom.db` |
+| Backup | `/var/backups/stroydom` |
+| Процесс | systemd `stroydom`, bind `127.0.0.1:3000` |
+| Прокси | Nginx 80 → 301 HTTPS, 443 → Next.js |
+| TLS | Let's Encrypt, auto-renew `snap.certbot.renew.timer` |
+| SSH | `deployadmin`, вход только по ключу |
+| Root SSH | `PermitRootLogin no` |
+| Password SSH | выключен |
+| UFW | OpenSSH + Nginx Full; порт 3000 снаружи закрыт |
+
+Вход на сервер:
+
+```bash
+ssh -i "$env:USERPROFILE\.ssh\id_ed25519" deployadmin@stroydom-project.ru
+```
+
+Админские команды — через `sudo` (нужен пароль `deployadmin`, не пароль root).

@@ -206,9 +206,10 @@ sqlite3 /var/lib/stroydom/stroydom.db \
 | ЭТАП 5 — mini-CRM | готов |
 | ЭТАП 6 — полировка и production preparation | готов |
 | ЭТАП 7 — публикация на GitHub и подготовка к Beget Cloud | готов |
+| ЭТАП 8 — Beget Cloud: HTTPS, SSH hardening | готов |
 
-**Реальный deploy на сервер не выполнялся.** Сервер не создан, домен не подключён, DNS не менялся.
+**Production:** [https://stroydom-project.ru](https://stroydom-project.ru)
 
-Следующий шаг: публикация на Beget Cloud VPS по инструкции [`DEPLOY_BEGET.md`](./DEPLOY_BEGET.md).  
-Для этого требуются созданный VPS с доступом по SSH, значения Telegram- и CRM-секретов,
-а также решение по домену и Яндекс.Метрике.
+Beget Cloud VPS, Ubuntu 24.04, Nginx + Let's Encrypt, systemd `stroydom`, SQLite `/var/lib/stroydom/stroydom.db`.  
+SSH: пользователь `deployadmin` по ключу, root SSH отключён, password auth выключен.  
+Подробности — в [`DEPLOY_BEGET.md`](./DEPLOY_BEGET.md).
