@@ -12,7 +12,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
     "db:clear-leads": "node scripts/clear-test-leads.mts",
-    "db:seed-demo": "node scripts/seed-demo-leads.mts"
+    "db:seed-demo": "node scripts/seed-demo-leads.mts",
+    "portfolio:screenshots": "node scripts/capture-portfolio-screenshots.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
@@ -29,6 +30,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.23",
+    "playwright": "^1.62.1",
     "prisma": "^6.19.3",
     "tailwindcss": "^4",
     "typescript": "^5"

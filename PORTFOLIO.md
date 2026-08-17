@@ -20,4 +20,8 @@
 **Ссылка:** [https://stroydom-project.ru](https://stroydom-project.ru)  
 **GitHub:** [https://github.com/O-Simonov/stroydom-demo](https://github.com/O-Simonov/stroydom-demo)
 
+![Главная страница](./docs/screenshots/01-home-desktop.png)
+
+![Mini-CRM](./docs/screenshots/06-crm-desktop.png)
+
 **Статус:** демонстрационный проект для портфолио. Компания вымышленная, заявки тестовые.

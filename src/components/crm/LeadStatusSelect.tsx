@@ -13,12 +13,14 @@ type LeadStatusSelectProps = {
   lead: CrmLead;
   onUpdated: (lead: CrmLead) => void;
   onError: (message: string) => void;
+  layout?: "inline" | "stack";
 };
 
 export function LeadStatusSelect({
   lead,
   onUpdated,
   onError,
+  layout = "inline",
 }: LeadStatusSelectProps) {
   const [loading, setLoading] = useState(false);
 
@@ -49,8 +51,16 @@ export function LeadStatusSelect({
     }
   }
 
+  const stacked = layout === "stack";
+
   return (
-    <div className="flex items-center gap-2">
+    <div
+      className={
+        stacked
+          ? "flex w-full min-w-0 flex-col items-start gap-1.5"
+          : "flex items-center gap-2"
+      }
+    >
       <span
         className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_BADGE_CLASS[lead.status]}`}
       >
@@ -61,7 +71,11 @@ export function LeadStatusSelect({
         disabled={loading}
         value={lead.status}
         onChange={(e) => changeStatus(e.target.value as LeadStatusValue)}
-        className="rounded-lg border border-[var(--line)] bg-[var(--paper)] px-2 py-1.5 text-sm disabled:opacity-60"
+        className={
+          stacked
+            ? "w-full min-w-0 max-w-full rounded-lg border border-[var(--line)] bg-[var(--paper)] px-2 py-1.5 text-sm disabled:opacity-60"
+            : "rounded-lg border border-[var(--line)] bg-[var(--paper)] px-2 py-1.5 text-sm disabled:opacity-60"
+        }
       >
         {LEAD_STATUSES.map((status) => (
           <option key={status} value={status}>

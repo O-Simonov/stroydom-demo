@@ -97,9 +97,37 @@ Internet → HTTPS → Nginx → Next.js (127.0.0.1:3000) → Prisma → SQLite
 
 ## Скриншоты
 
-Кадры для портфолио снимаются вручную по чеклисту [`SCREENSHOTS.md`](./SCREENSHOTS.md) и складываются в `docs/screenshots/`. Пока файлов нет, ссылки на изображения не публикуются.
+**Live demo:** [https://stroydom-project.ru](https://stroydom-project.ru)
 
-Полный разбор кейса: [`CASE.md`](./CASE.md) · короткая карточка: [`PORTFOLIO.md`](./PORTFOLIO.md)
+Mini-CRM показана на скриншотах ниже; production CRM защищена авторизацией и не предназначена для публичного входа.
+
+### Главная страница
+
+![Главная страница СТРОЙДОМ](./docs/screenshots/01-home-desktop.png)
+
+### Подбор параметров
+
+![Подбор параметров дома](./docs/screenshots/02-parameters-desktop.png)
+
+### Заявка
+
+![Форма заявки](./docs/screenshots/03-form-desktop.png)
+
+### Mini-CRM
+
+![Mini-CRM — список demo-заявок](./docs/screenshots/06-crm-desktop.png)
+
+### Карточка лида
+
+![Карточка demo-лида в CRM](./docs/screenshots/07-crm-details.png)
+
+### Mobile
+
+![Главная страница на мобильном](./docs/screenshots/04-home-mobile.png)
+
+![CRM на мобильном](./docs/screenshots/08-crm-mobile.png)
+
+Полный чеклист кадров: [`SCREENSHOTS.md`](./SCREENSHOTS.md). Разбор кейса: [`CASE.md`](./CASE.md) · короткая карточка: [`PORTFOLIO.md`](./PORTFOLIO.md)
 
 ## Локальный запуск
 

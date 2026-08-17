@@ -87,8 +87,9 @@ export function LeadTable({ leads, onOpen, onUpdated, onError }: LeadTableProps)
                     {displayValue(lead.source)}
                   </span>
                 </td>
-                <td className="px-3 py-2.5">
+                <td className="min-w-0 overflow-hidden px-3 py-2.5">
                   <LeadStatusSelect
+                    layout="stack"
                     lead={lead}
                     onUpdated={onUpdated}
                     onError={onError}
@@ -98,7 +99,7 @@ export function LeadTable({ leads, onOpen, onUpdated, onError }: LeadTableProps)
                   <button
                     type="button"
                     onClick={() => onOpen(lead)}
-                    className="rounded-full border border-[var(--line)] px-3 py-1.5 text-xs font-medium transition hover:bg-[var(--sand)]"
+                    className="inline-flex whitespace-nowrap rounded-full border border-[var(--line)] px-3 py-1.5 text-xs font-medium transition hover:bg-[var(--sand)]"
                   >
                     Подробнее
                   </button>

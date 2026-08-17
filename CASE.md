@@ -36,6 +36,10 @@
 8. Лид появляется в `/leads`.
 9. Менеджер меняет статус по ходу работы.
 
+![Главная страница](./docs/screenshots/01-home-desktop.png)
+
+![Подбор параметров дома](./docs/screenshots/02-parameters-desktop.png)
+
 ## CRM flow
 
 ```
@@ -51,6 +55,10 @@ NEW → CONTACTED → QUOTE_SENT → NEGOTIATION → WON / LOST
 **Backend.** `POST /api/leads`, Zod, Prisma, honeypot, rate limit, Telegram best-effort (ошибка бота не откатывает заявку).
 
 **CRM.** Пароль, HMAC-сессия, список, поиск, фильтры, счётчики, карточка лида, смена статуса, карточки на мобильном.
+
+![Mini-CRM — список demo-заявок](./docs/screenshots/06-crm-desktop.png)
+
+![Карточка demo-лида](./docs/screenshots/07-crm-details.png)
 
 **Инфраструктура.** Ubuntu VPS, Nginx, systemd, Let's Encrypt, Certbot auto-renew, SQLite вне каталога кода, backup, `/api/health`, GitHub, SSH только по ключу, UFW.
 
@@ -79,3 +87,5 @@ NEW → CONTACTED → QUOTE_SENT → NEGOTIATION → WON / LOST
 ## Статус
 
 Демонстрационный проект для портфолио. Не является сайтом действующей строительной компании и не содержит отчёта о продажах.
+
+![Главная страница на мобильном](./docs/screenshots/04-home-mobile.png)
