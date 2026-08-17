@@ -1,215 +1,126 @@
-# СТРОЙДОМ — DEMO PROJECT 01
+# СТРОЙДОМ
 
-Сайт строительной компании с калькулятором, приёмом заявок, Telegram-уведомлениями и mini-CRM.
+Демонстрационный full-stack проект сайта строительной компании.
 
-**Демонстрационный проект для портфолио.** Компания вымышленная, контакты и заявки — тестовые.
+**Live demo:** [https://stroydom-project.ru](https://stroydom-project.ru)
 
-Кейс: [`CASE.md`](./CASE.md) · Короткая версия: [`PORTFOLIO.md`](./PORTFOLIO.md) · Деплой: [`DEPLOY_BEGET.md`](./DEPLOY_BEGET.md), [`DEPLOY_VPS.md`](./DEPLOY_VPS.md) · Спецификация: [`SPEC.md`](./SPEC.md)
+GitHub: [O-Simonov/stroydom-demo](https://github.com/O-Simonov/stroydom-demo)
 
 ---
 
 ## О проекте
 
-Полный цикл работы с обращением клиента в одном Next.js-приложении:
+Смоделирован типичный малый бизнес: строительство загородных домов под ключ. Сайт не только показывает услуги — он принимает обращение, сохраняет его и отдаёт менеджеру в работу.
+
+Это **демонстрационный проект для портфолио**, не сайт реальной компании. Контент, контакты и заявки — тестовые.
+
+## Что получает бизнес
+
+Посетитель выбирает параметры дома и оставляет контакты. Заявка сразу попадает в базу, менеджер получает уведомление в Telegram, обращение появляется в закрытой CRM — и дальше ведётся по статусам, без Excel и переписок в мессенджере.
 
 ```
-Сайт → калькулятор → форма → POST /api/leads → SQLite → Telegram
-                                                  ↓
-                              Менеджер → /leads (mini-CRM) → статусы
+Посетитель → сайт → заявка → Telegram → CRM → обработка лида
 ```
 
 ## Возможности
 
-**Публичная часть**
+### Клиентская часть
 
-- адаптивный лендинг: hero, преимущества, каталог проектов домов, этапы работ, галерея;
-- калькулятор параметров дома: площадь, этажность, материал, комплектация (денежная стоимость не рассчитывается);
-- форма заявки с автоподстановкой параметров из калькулятора;
-- серверная валидация, honeypot и rate limit против спама;
-- UTM-трекинг и сохранение landing URL.
+- адаптивный лендинг: услуги, проекты домов, этапы работ;
+- подбор параметров дома (площадь, этажность, материал, комплектация);
+- форма заявки с состояниями загрузки, успеха и ошибки;
+- удобная работа с телефона;
+- сохранение UTM и адреса страницы входа.
 
-**Mini-CRM `/leads`**
+### Back-end
 
-- вход по паролю, подписанная сессия (HMAC SHA-256, 8 часов);
-- список последних 50 заявок, новые сверху;
-- счётчики: всего / новые / в работе / продажи;
-- фильтр по статусу и поиск по имени, телефону, Telegram;
-- карточка заявки со всеми параметрами и UTM;
-- смена статуса заявки;
-- адаптив: таблица на desktop, карточки на мобильном.
+- `POST /api/leads` с серверной валидацией;
+- хранение заявок в базе;
+- уведомление в Telegram (сбой мессенджера не теряет заявку).
 
-## Технологии
+### Mini-CRM
 
-Next.js 15 (App Router) · TypeScript · Tailwind CSS 4 · Prisma · SQLite · Zod · Telegram Bot API
+- вход по паролю;
+- список обращений, поиск и фильтр по статусу;
+- карточка лида с параметрами и источником;
+- смена статуса сделки;
+- выход из сессии.
 
----
+### Production
+
+- Ubuntu VPS, Nginx, systemd;
+- HTTPS (Let's Encrypt);
+- резервные копии SQLite;
+- health-check `/api/health`.
+
+## Архитектура
+
+```
+Visitor
+   ↓
+Next.js Landing
+   ↓
+POST /api/leads
+   ↓
+Prisma → SQLite
+   ↓
+Telegram notification
+   ↓
+Mini-CRM /leads
+```
+
+Размещение:
+
+```
+Internet → HTTPS → Nginx → Next.js (127.0.0.1:3000) → Prisma → SQLite
+```
+
+Подробности деплоя: [`DEPLOY_BEGET.md`](./DEPLOY_BEGET.md).
+
+## Стек
+
+| Слой | Технологии |
+|------|------------|
+| Frontend | Next.js 15, React, TypeScript, Tailwind CSS |
+| Backend | Next.js Route Handlers, Zod, Prisma |
+| База | SQLite |
+| Интеграции | Telegram Bot API |
+| Инфраструктура | Ubuntu, Nginx, systemd, Let's Encrypt, GitHub |
+
+## Безопасность
+
+- секреты только на сервере, не в браузере;
+- CRM за паролем, сессия в HttpOnly-cookie (`Secure` в production, `SameSite`);
+- серверная валидация, honeypot и базовый rate limit;
+- CRM-эндпоинты закрыты без сессии;
+- сайт за HTTPS, приложение слушает только localhost за Nginx.
+
+## Скриншоты
+
+Кадры для портфолио снимаются вручную по чеклисту [`SCREENSHOTS.md`](./SCREENSHOTS.md) и складываются в `docs/screenshots/`. Пока файлов нет, ссылки на изображения не публикуются.
+
+Полный разбор кейса: [`CASE.md`](./CASE.md) · короткая карточка: [`PORTFOLIO.md`](./PORTFOLIO.md)
 
 ## Локальный запуск
 
 ```bash
-npm install
-copy .env.example .env      # macOS/Linux: cp .env.example .env
-npm run db:migrate
+git clone https://github.com/O-Simonov/stroydom-demo.git
+cd stroydom-demo
+npm ci
+cp .env.example .env
+```
+
+В `.env` задайте `DATABASE_URL`, при необходимости Telegram и CRM-переменные (значения не коммитить).
+
+```bash
+npx prisma generate
+npx prisma migrate deploy
 npm run dev
 ```
 
-Открыть `http://localhost:3000`.
+Открыть [http://localhost:3000](http://localhost:3000). CRM: `/leads`.
 
-> `npm run dev` запускает обычный Next.js dev server **без Turbopack**.
+## Статус проекта
 
-## Environment variables
-
-Все переменные задаются в локальном `.env` (файл в `.gitignore`, в репозиторий не попадает).
-
-| Переменная | Назначение |
-|------------|------------|
-| `DATABASE_URL` | путь к SQLite. Локально `file:./dev.db` |
-| `NEXT_PUBLIC_SITE_URL` | публичный origin сайта: OpenGraph, canonical, sitemap. Пусто локально |
-| `TELEGRAM_BOT_TOKEN` | токен бота (только сервер) |
-| `TELEGRAM_CHAT_ID` | чат для уведомлений (только сервер) |
-| `CRM_PASSWORD` | пароль входа в mini-CRM (только сервер) |
-| `CRM_SESSION_SECRET` | секрет подписи session cookie (только сервер) |
-| `NEXT_PUBLIC_METRIKA_ID` | Яндекс.Метрика. Пока не подключена |
-
-Шаблоны: [`.env.example`](./.env.example) (локально), [`.env.production.example`](./.env.production.example) (сервер).
-
-Секреты никогда не передаются в браузер: префикс `NEXT_PUBLIC_` используется только для `SITE_URL` и `METRIKA_ID`.
-
-## Prisma
-
-```bash
-npm run db:migrate      # prisma migrate dev — только для разработки
-npm run db:deploy       # prisma migrate deploy — для production
-npm run db:generate     # prisma generate
-npm run db:studio       # визуальный просмотр базы
-```
-
-Модель `Lead` со статусами: `NEW`, `CONTACTED`, `QUOTE_SENT`, `NEGOTIATION`, `WON`, `LOST`.
-
-## Telegram setup
-
-1. Создать бота у [@BotFather](https://t.me/BotFather) и получить token.
-2. Отправить боту `/start`.
-3. Узнать `chat_id`: `https://api.telegram.org/bot<TOKEN>/getUpdates`.
-4. Записать `TELEGRAM_BOT_TOKEN` и `TELEGRAM_CHAT_ID` в `.env`, перезапустить `npm run dev`.
-
-Уведомление отправляется **после** сохранения заявки в базу. Ошибка Telegram не ломает заявку — `POST /api/leads` всё равно возвращает `201`.
-
-## CRM setup
-
-1. Задать в `.env`:
-
-```env
-CRM_PASSWORD="отдельный_пароль_для_CRM"
-CRM_SESSION_SECRET="длинная_случайная_строка"
-```
-
-`CRM_SESSION_SECRET` — секрет подписи cookie. Генерация в PowerShell:
-
-```powershell
-[Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
-```
-
-В Linux/macOS: `openssl rand -base64 32`.
-
-Не использовать Telegram token или `DATABASE_URL` в качестве пароля CRM.
-
-2. Перезапустить `npm run dev`.
-3. Открыть `http://localhost:3000/leads` и войти по `CRM_PASSWORD`.
-
-Если переменные не заданы, CRM закрывается наглухо (`503 CRM is not configured`), а публичный сайт и приём заявок продолжают работать.
-
-## API
-
-| Метод | Endpoint | Доступ |
-|-------|----------|--------|
-| `POST` | `/api/leads` | публичный: Zod, honeypot, rate limit, Prisma, Telegram → `201` |
-| `GET` | `/api/leads` | только CRM: последние 50, фильтр `?status=`, поиск `?q=`, `no-store` |
-| `PATCH` | `/api/leads/[id]` | только CRM: меняет исключительно `status` |
-| `POST` | `/api/crm/login` | rate limit на неудачные попытки |
-| `POST` | `/api/crm/logout` | same-origin |
-| `GET` | `/api/health` | публичный liveness: `{"status":"ok"}` |
-
-Удаление и редактирование контактов заявки через API не реализовано намеренно.
-
-## Development commands
-
-```bash
-npm run dev              # dev server (без Turbopack)
-npm run build            # prisma generate + next build
-npm start                # production server
-npm run lint             # eslint
-
-npm run db:clear-leads   # удалить все Lead (schema и миграции не трогает)
-npm run db:seed-demo     # создать 6 демо-заявок для скриншотов
-```
-
-`db:clear-leads` и `db:seed-demo` запускаются **только вручную** и не подключены к install/build/start. В production их запускать нельзя.
-
-## Production preparation
-
-- сборка: `npm run build`, запуск: `npm start` (Next.js слушает `127.0.0.1:3000`);
-- перед сервером стоит Nginx (80/443) с TLS от Let's Encrypt;
-- автозапуск через systemd: [`deploy/stroydom.service.example`](./deploy/stroydom.service.example);
-- конфиг прокси: [`deploy/nginx-stroydom.example.conf`](./deploy/nginx-stroydom.example.conf);
-- миграции в production только через `npx prisma migrate deploy`;
-- база хранится вне каталога приложения — `/var/lib/stroydom/stroydom.db`;
-- общая инструкция для любого Linux VPS: [`DEPLOY_VPS.md`](./DEPLOY_VPS.md);
-- пошаговый проход по Beget Cloud, от создания сервера до HTTPS: [`DEPLOY_BEGET.md`](./DEPLOY_BEGET.md).
-
-## Рабочий процесс обновления
-
-```
-локальная разработка
-      ↓  git commit
-      ↓  git push origin main
-GitHub — O-Simonov/stroydom-demo
-      ↓  git pull --ff-only origin main
-Beget VPS  /opt/stroydom
-      ↓  npm ci
-      ↓  npx prisma migrate deploy
-      ↓  npm run build
-      ↓  systemctl restart stroydom
-проверка /api/health
-```
-
-Перед каждым обновлением на сервере делается backup базы. Подробности — в [`DEPLOY_BEGET.md`](./DEPLOY_BEGET.md).
-
-## Backup SQLite
-
-Локально перед опасными операциями:
-
-```bash
-copy prisma\dev.db backups\dev-YYYY-MM-DD.db
-```
-
-На сервере:
-
-```bash
-sqlite3 /var/lib/stroydom/stroydom.db \
-  ".backup '/var/backups/stroydom/stroydom-$(date +%F).db'"
-```
-
-Восстановление: остановить сервис, скопировать файл обратно, запустить сервис.  
-Подробности и cron-пример — в [`DEPLOY_VPS.md`](./DEPLOY_VPS.md).
-
----
-
-## Current status
-
-| Этап | Статус |
-|------|--------|
-| ЭТАП 1 — структура проекта | готов |
-| ЭТАП 2 — лендинг | готов |
-| ЭТАП 3 — `POST /api/leads` | готов |
-| ЭТАП 4 — Telegram | готов и реально протестирован |
-| ЭТАП 5 — mini-CRM | готов |
-| ЭТАП 6 — полировка и production preparation | готов |
-| ЭТАП 7 — публикация на GitHub и подготовка к Beget Cloud | готов |
-| ЭТАП 8 — Beget Cloud: HTTPS, SSH hardening | готов |
-
-**Production:** [https://stroydom-project.ru](https://stroydom-project.ru)
-
-Beget Cloud VPS, Ubuntu 24.04, Nginx + Let's Encrypt, systemd `stroydom`, SQLite `/var/lib/stroydom/stroydom.db`.  
-SSH: пользователь `deployadmin` по ключу, root SSH отключён, password auth выключен.  
-Подробности — в [`DEPLOY_BEGET.md`](./DEPLOY_BEGET.md).
+СТРОЙДОМ — демонстрационный проект, созданный для портфолио.  
+Названия компании, контент и заявки используются исключительно в демонстрационных целях.
