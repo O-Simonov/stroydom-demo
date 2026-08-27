@@ -560,7 +560,7 @@ async function loginCrm(page, origin) {
   if (!cookies.some((cookie) => cookie.name === "crm_session" && cookie.value)) {
     fail("CRM login did not set a session cookie.");
   }
-  await page.getByRole("heading", { name: "Mini CRM" }).waitFor();
+  await page.getByRole("heading", { name: "Учёт заявок" }).waitFor();
   await blurActive(page);
 }
 

@@ -63,7 +63,7 @@ export function CrmLoginForm() {
       </div>
 
       <h1 className="mt-5 font-[family-name:var(--font-display)] text-3xl text-[var(--ink)]">
-        Mini CRM
+        Учёт заявок
       </h1>
       <p className="mt-2 text-sm text-[var(--muted)]">
         Вход в систему обработки заявок

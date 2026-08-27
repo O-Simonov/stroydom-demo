@@ -32,10 +32,10 @@ function phoneLooksValid(phone: string): boolean {
 }
 
 /**
- * Server-side schema for POST /api/leads.
+ * Base fields shared by demo simulation and production create.
  * Client validation is UX only and must not replace this.
  */
-export const leadCreateSchema = z.object({
+const leadFieldsSchema = z.object({
   name: z.string().trim().min(2, "Укажите имя").max(100, "Слишком длинное имя"),
   phone: z
     .string()
@@ -75,8 +75,28 @@ export const leadCreateSchema = z.object({
   website: z.string().max(200).optional().nullable(),
 });
 
+/**
+ * Production create — consent must be explicitly true (Zod literal).
+ * consent=false or missing → rejected.
+ */
+export const leadCreateSchema = leadFieldsSchema.extend({
+  consent: z.literal(true, {
+    error: "Необходимо согласие на обработку персональных данных",
+  }),
+});
+
+/** Demo simulation may omit consent (no PD persistence). */
+export const leadDemoSchema = leadFieldsSchema.extend({
+  consent: z.boolean().optional(),
+});
+
 export type LeadCreateInput = z.infer<typeof leadCreateSchema>;
+export type LeadDemoInput = z.infer<typeof leadDemoSchema>;
 
 export function parseLeadCreate(data: unknown) {
   return leadCreateSchema.safeParse(data);
+}
+
+export function parseLeadDemo(data: unknown) {
+  return leadDemoSchema.safeParse(data);
 }

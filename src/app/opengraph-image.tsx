@@ -29,7 +29,7 @@ export default function OpengraphImage() {
             Строительство загородных домов под ключ
           </div>
           <div style={{ display: "flex", fontSize: 30, color: "#c8d1c9", maxWidth: 860 }}>
-            Подбор параметров дома, заявка, Telegram-уведомления и mini-CRM
+            Подбор параметров дома, заявка, уведомления и учёт обращений
           </div>
         </div>
 

@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { readAttributionFromLocation } from "@/lib/attribution";
 import type { CalculatorValues } from "@/lib/types";
 
 type LeadFormProps = {
   calculatorValues: CalculatorValues | null;
+  /** From server: SITE_MODE */
+  siteMode: "demo" | "production";
 };
 
 type FormState = {
@@ -14,6 +17,7 @@ type FormState = {
   telegram: string;
   comment: string;
   website: string;
+  consent: boolean;
 };
 
 const empty: FormState = {
@@ -22,15 +26,17 @@ const empty: FormState = {
   telegram: "",
   comment: "",
   website: "",
+  consent: false,
 };
 
 const DEFAULT_SERVICE = "Строительство дома";
 
-export function LeadForm({ calculatorValues }: LeadFormProps) {
+export function LeadForm({ calculatorValues, siteMode }: LeadFormProps) {
+  const isDemo = siteMode === "demo";
   const [form, setForm] = useState<FormState>(empty);
-  const [errors, setErrors] = useState<Partial<Record<"name" | "phone", string>>>(
-    {},
-  );
+  const [errors, setErrors] = useState<
+    Partial<Record<"name" | "phone" | "consent", string>>
+  >({});
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -42,11 +48,14 @@ export function LeadForm({ calculatorValues }: LeadFormProps) {
   }, [calculatorValues]);
 
   function validate(values: FormState) {
-    const next: Partial<Record<"name" | "phone", string>> = {};
+    const next: Partial<Record<"name" | "phone" | "consent", string>> = {};
     if (!values.name.trim()) next.name = "Укажите имя";
     if (!values.phone.trim()) next.phone = "Укажите телефон";
     else if (values.phone.replace(/\D/g, "").length < 10) {
       next.phone = "Проверьте номер телефона";
+    }
+    if (!isDemo && !values.consent) {
+      next.consent = "Нужно согласие на обработку персональных данных";
     }
     return next;
   }
@@ -55,12 +64,11 @@ export function LeadForm({ calculatorValues }: LeadFormProps) {
     setForm((prev) => ({ ...prev, [field]: value }));
     setSubmitted(false);
     setFormError(null);
-    if (field === "name" || field === "phone") {
-      const key: "name" | "phone" = field;
+    if (field === "name" || field === "phone" || field === "consent") {
       setErrors((prev) => {
-        if (!prev[key]) return prev;
+        if (!prev[field as "name" | "phone" | "consent"]) return prev;
         const next = { ...prev };
-        delete next[key];
+        delete next[field as "name" | "phone" | "consent"];
         return next;
       });
     }
@@ -83,7 +91,7 @@ export function LeadForm({ calculatorValues }: LeadFormProps) {
 
     const attribution = readAttributionFromLocation();
 
-    const payload = {
+    const payload: Record<string, unknown> = {
       name: form.name.trim(),
       phone: form.phone.trim(),
       telegram: form.telegram.trim() || undefined,
@@ -103,6 +111,10 @@ export function LeadForm({ calculatorValues }: LeadFormProps) {
       website: form.website,
     };
 
+    if (!isDemo) {
+      payload.consent = form.consent === true;
+    }
+
     try {
       const response = await fetch("/api/leads", {
         method: "POST",
@@ -118,6 +130,7 @@ export function LeadForm({ calculatorValues }: LeadFormProps) {
           telegram: "",
           comment: "",
           website: "",
+          consent: false,
         });
         setErrors({});
         return;
@@ -130,6 +143,13 @@ export function LeadForm({ calculatorValues }: LeadFormProps) {
 
       if (response.status === 400) {
         setFormError("Проверьте заполнение формы.");
+        return;
+      }
+
+      if (response.status === 503) {
+        setFormError(
+          "Приём заявок временно недоступен. Попробуйте позже или свяжитесь иным способом.",
+        );
         return;
       }
 
@@ -146,11 +166,13 @@ export function LeadForm({ calculatorValues }: LeadFormProps) {
       <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
         <div>
           <p className="eyebrow">Заявка</p>
-          <h2 className="section-title">Получите консультацию</h2>
+          <h2 className="section-title">
+            {isDemo ? "Демонстрация формы заявки" : "Получите консультацию"}
+          </h2>
           <p className="section-lead">
-            Оставьте контакты и параметры дома — заявка сохранится в системе,
-            менеджер получит уведомление в Telegram, а обращение появится в
-            mini-CRM.
+            {isDemo
+              ? "Интерфейс показывает, как посетитель оставляет обращение. В демонстрационном режиме заявка не отправляется и персональные данные не сохраняются."
+              : "Оставьте контакты и параметры дома — заявка сохранится в системе, менеджер получит уведомление, а обращение появится в разделе заявок."}
           </p>
 
           {calculatorValues ? (
@@ -188,6 +210,16 @@ export function LeadForm({ calculatorValues }: LeadFormProps) {
           noValidate
           className="relative rounded-3xl border border-[var(--line)] bg-[var(--sand)]/25 p-6 sm:p-8"
         >
+          {isDemo ? (
+            <p
+              className="mb-5 rounded-2xl border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm text-[var(--muted)]"
+              role="note"
+            >
+              Демонстрационный проект: данные из этой формы не сохраняются и не
+              передаются третьим лицам.
+            </p>
+          ) : null}
+
           <div className="hp-field" aria-hidden="true">
             <label htmlFor="lead-website">Website</label>
             <input
@@ -204,7 +236,7 @@ export function LeadForm({ calculatorValues }: LeadFormProps) {
           <div className="grid gap-5">
             <div>
               <label htmlFor="lead-name" className="field-label">
-                Имя *
+                Имя {isDemo ? "" : "*"}
               </label>
               <input
                 id="lead-name"
@@ -227,7 +259,7 @@ export function LeadForm({ calculatorValues }: LeadFormProps) {
 
             <div>
               <label htmlFor="lead-phone" className="field-label">
-                Телефон *
+                Телефон {isDemo ? "" : "*"}
               </label>
               <input
                 id="lead-phone"
@@ -281,6 +313,52 @@ export function LeadForm({ calculatorValues }: LeadFormProps) {
                 className="field-input min-h-[120px] resize-y"
               />
             </div>
+
+            {!isDemo ? (
+              <div>
+                <div className="flex items-start gap-3">
+                  <input
+                    id="lead-consent"
+                    name="consent"
+                    type="checkbox"
+                    checked={form.consent}
+                    disabled={loading}
+                    required
+                    onChange={(e) => updateField("consent", e.target.checked)}
+                    className="mt-1 h-4 w-4 shrink-0 rounded border-[var(--line)] text-[var(--forest)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--forest)]"
+                    aria-invalid={Boolean(errors.consent)}
+                    aria-describedby={
+                      errors.consent ? "lead-consent-error" : "lead-consent-hint"
+                    }
+                  />
+                  <label htmlFor="lead-consent" className="text-sm leading-relaxed text-[var(--ink)]">
+                    Я даю согласие на обработку персональных данных в соответствии с{" "}
+                    <Link
+                      href="/personal-data-consent"
+                      className="underline underline-offset-2 hover:text-[var(--forest)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--forest)]"
+                    >
+                      согласием на обработку персональных данных
+                    </Link>
+                    . Также ознакомлен(а) с{" "}
+                    <Link
+                      href="/privacy"
+                      className="underline underline-offset-2 hover:text-[var(--forest)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--forest)]"
+                    >
+                      политикой обработки персональных данных
+                    </Link>
+                    .
+                  </label>
+                </div>
+                <p id="lead-consent-hint" className="sr-only">
+                  Согласие обязательно для отправки заявки
+                </p>
+                {errors.consent ? (
+                  <p id="lead-consent-error" className="mt-2 text-sm text-red-700">
+                    {errors.consent}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
           </div>
 
           <button
@@ -288,15 +366,24 @@ export function LeadForm({ calculatorValues }: LeadFormProps) {
             disabled={loading}
             className="mt-7 inline-flex w-full items-center justify-center rounded-full bg-[var(--forest)] px-6 py-3.5 text-sm font-semibold text-[var(--paper)] transition hover:bg-[var(--forest-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--forest)] disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
           >
-            {loading ? "Отправляем..." : "Получить консультацию"}
+            {loading
+              ? isDemo
+                ? "Проверяем…"
+                : "Отправляем…"
+              : isDemo
+                ? "Проверить демонстрацию"
+                : "Получить консультацию"}
           </button>
 
           {submitted ? (
             <p
               className="mt-4 rounded-2xl border border-[color-mix(in_srgb,var(--forest)_25%,var(--line))] bg-[color-mix(in_srgb,var(--forest)_8%,var(--paper))] px-4 py-3 text-sm text-[var(--forest-deep)]"
               role="status"
+              aria-live="polite"
             >
-              Спасибо! Заявка отправлена.
+              {isDemo
+                ? "Это демонстрационная версия сайта. Заявка не отправляется и персональные данные не сохраняются."
+                : "Спасибо! Заявка отправлена."}
             </p>
           ) : null}
 

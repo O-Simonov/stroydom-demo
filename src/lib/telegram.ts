@@ -1,21 +1,5 @@
 export type LeadNotificationPayload = {
   id: string;
-  name: string;
-  phone: string;
-  telegram: string | null;
-  comment: string | null;
-  service: string;
-  area: number | null;
-  floors: number | null;
-  material: string | null;
-  package: string | null;
-  source: string | null;
-  utmSource: string | null;
-  utmMedium: string | null;
-  utmCampaign: string | null;
-  utmContent: string | null;
-  utmTerm: string | null;
-  landingUrl: string | null;
   createdAt: Date;
 };
 
@@ -25,7 +9,6 @@ export type TelegramSendResult =
   | { ok: false; error: string };
 
 const TELEGRAM_TIMEOUT_MS = 5_000;
-const MAX_LANDING_URL_CHARS = 180;
 
 function formatMoscowDate(date: Date): string {
   return new Intl.DateTimeFormat("ru-RU", {
@@ -38,69 +21,24 @@ function formatMoscowDate(date: Date): string {
   }).format(date);
 }
 
-function truncateUrl(url: string): string {
-  if (url.length <= MAX_LANDING_URL_CHARS) return url;
-  return `${url.slice(0, MAX_LANDING_URL_CHARS - 1)}…`;
-}
-
-function line(label: string, value: string | number | null | undefined): string | null {
-  if (value == null) return null;
-  const text = String(value).trim();
-  if (!text) return null;
-  return `${label}: ${text}`;
-}
-
-/** Build a plain-text Telegram message for a new lead. */
+/**
+ * Minimal Telegram message — lead id + CRM hint only.
+ * Does not include name, phone, telegram, comment, or other PII.
+ */
 export function formatLeadTelegramMessage(lead: LeadNotificationPayload): string {
-  const blocks: string[] = ["Новая заявка — СТРОЙДОМ", ""];
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "");
+  const crmPath = "/leads";
+  const crmUrl = siteUrl ? `${siteUrl}${crmPath}` : crmPath;
 
-  const contacts = [
-    line("Клиент", lead.name),
-    line("Телефон", lead.phone),
-    line("Telegram", lead.telegram),
-  ].filter(Boolean) as string[];
-  blocks.push(...contacts);
-
-  blocks.push("", `Услуга: ${lead.service}`);
-
-  const house = [
-    line("Площадь", lead.area != null ? `${lead.area} м²` : null),
-    line("Этажи", lead.floors),
-    line("Материал", lead.material),
-    line("Комплектация", lead.package),
-  ].filter(Boolean) as string[];
-
-  if (house.length > 0) {
-    blocks.push("", "Параметры дома:", ...house);
-  }
-
-  if (lead.comment?.trim()) {
-    blocks.push("", "Комментарий:", lead.comment.trim());
-  }
-
-  if (lead.source?.trim()) {
-    blocks.push("", `Источник: ${lead.source.trim()}`);
-  }
-
-  const marketing = [
-    line("utm_source", lead.utmSource),
-    line("utm_medium", lead.utmMedium),
-    line("utm_campaign", lead.utmCampaign),
-    line("utm_content", lead.utmContent),
-    line("utm_term", lead.utmTerm),
-  ].filter(Boolean) as string[];
-
-  if (marketing.length > 0) {
-    blocks.push("", "Маркетинг:", ...marketing);
-  }
-
-  if (lead.landingUrl?.trim()) {
-    blocks.push("", "Страница:", truncateUrl(lead.landingUrl.trim()));
-  }
-
-  blocks.push("", `Дата: ${formatMoscowDate(lead.createdAt)}`, `ID: ${lead.id}`);
-
-  return blocks.join("\n");
+  return [
+    "Новая заявка — СТРОЙДОМ",
+    "",
+    `ID: ${lead.id}`,
+    `Дата: ${formatMoscowDate(lead.createdAt)}`,
+    `CRM: ${crmUrl}`,
+    "",
+    "Персональные данные не передаются в это уведомление — откройте CRM.",
+  ].join("\n");
 }
 
 /**

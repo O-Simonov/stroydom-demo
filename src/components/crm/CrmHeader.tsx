@@ -31,7 +31,7 @@ export function CrmHeader({ onRefresh, isRefreshing = false }: CrmHeaderProps) {
           СТРОЙДОМ
         </p>
         <h1 className="mt-1 font-[family-name:var(--font-display)] text-2xl text-[var(--ink)] sm:text-3xl">
-          Mini CRM
+          Учёт заявок
         </h1>
       </div>
       <div className="flex items-center gap-2">

@@ -4,12 +4,14 @@ import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rateLimit";
 import { getRequestIp } from "@/lib/requestIp";
 import { sendLeadNotification } from "@/lib/telegram";
-import { parseLeadCreate } from "@/lib/validation/lead";
+import { parseLeadCreate, parseLeadDemo } from "@/lib/validation/lead";
 import {
   isCrmConfigured,
   requireCrmSession,
 } from "@/lib/crm/session";
 import { leadListQuerySchema } from "@/lib/crm/validation";
+import { isDemoMode, isProductionMode, CONSENT_DOCUMENT_VERSION } from "@/lib/siteMode";
+import { checkProductionLegalGate } from "@/lib/legalConfig";
 
 export const runtime = "nodejs";
 
@@ -92,6 +94,58 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // ——— DEMO: simulate success, never persist PII, never notify ———
+  if (isDemoMode()) {
+    const parsed = parseLeadDemo(json);
+    if (!parsed.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Проверьте заполнение формы.",
+          fields: parsed.error.flatten().fieldErrors,
+        },
+        { status: 400 },
+      );
+    }
+
+    if (parsed.data.website && parsed.data.website.trim() !== "") {
+      return NextResponse.json(
+        { success: true, demo: true, id: "demo-accepted" },
+        { status: 201 },
+      );
+    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        demo: true,
+        id: "demo-simulated",
+        message:
+          "Демонстрационный режим: заявка не сохранена, персональные данные не передаются.",
+      },
+      { status: 201 },
+    );
+  }
+
+  // ——— PRODUCTION ———
+  if (isProductionMode()) {
+    const legalGate = checkProductionLegalGate();
+    if (!legalGate.ok) {
+      console.error(
+        "[POST /api/leads] Production legal gate failed; missing config keys count:",
+        legalGate.missing.length,
+      );
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Приём заявок временно недоступен: не завершена конфигурация оператора.",
+        },
+        { status: 503 },
+      );
+    }
+  }
+
   const parsed = parseLeadCreate(json);
   if (!parsed.success) {
     return NextResponse.json(
@@ -109,6 +163,8 @@ export async function POST(request: NextRequest) {
   if (data.website && data.website.trim() !== "") {
     return NextResponse.json({ success: true, id: "accepted" }, { status: 201 });
   }
+
+  const consentTimestamp = new Date();
 
   try {
     const lead = await prisma.lead.create({
@@ -129,6 +185,9 @@ export async function POST(request: NextRequest) {
         utmContent: data.utmContent,
         utmTerm: data.utmTerm,
         landingUrl: data.landingUrl,
+        consentGiven: true,
+        consentTimestamp,
+        consentDocumentVersion: CONSENT_DOCUMENT_VERSION,
         status: "NEW",
       },
     });

@@ -1,0 +1,111 @@
+---
+description: Mandatory WEB PROJECT RELEASE STANDARD — Russian law, PD/privacy/consent, SEO, security, a11y, client recommendations; PR-CY/Auditikk optional
+alwaysApply: true
+---
+
+# WEB PROJECT RELEASE STANDARD (always apply)
+
+Applies to every web project in `C:\Users\Administrator\Projects\IT-Agency`: sites, landings, shops, corporate, portfolio, SaaS, CRM with public frontend, Next.js/React/Vue and future web apps.
+
+Full standard: `docs/WEB_PROJECT_RELEASE_STANDARD.md`  
+Templates: `templates/web-project-compliance/`  
+Init: `tools/init-web-project-compliance.ps1`
+
+## Mandatory release gates
+
+Do not treat a site as release-ready until applicable gates are done (via **own** code/architecture/business-flow analysis) and serious production projects have `docs/RELEASE_AUDIT.md` with a final verdict.
+
+Required (when applicable):
+
+1. Russian law applicability analysis
+2. Personal data / 152-FZ
+3. Privacy policy + consent (when consent is the basis / when PD collected)
+4. Localization of primary PD collection (RF citizens)
+5. Roskomnadzor notification assessment (owner action — never assert registration)
+6. Cross-border transfer risks
+7. Russian-language public information
+8. Consumer protection (2300-1) when offering to consumers
+9. Advertising (38-FZ) / ERID — only if real ads
+10. Payments (54-FZ) — only if payment + receipt duty
+11. Security baseline
+12. SEO baseline (Cursor performs this; tools do not replace it)
+13. Accessibility baseline
+14. Technical quality (build/tests/live checks when domain exists)
+15. **Client / Owner Actions** recommendations (mandatory deliverable)
+
+First determine **applicability**. Do not mechanically apply every law to every site.
+
+## Optional supporting tools (NOT mandatory)
+
+**PR-CY** (`https://pr-cy.ru/`) = OPTIONAL SUPPORTING TOOL  
+**Auditikk** (`https://auditikk.ru/`) = OPTIONAL SUPPORTING TOOL
+
+Use when: public production domain exists; extra independent automated audit helps; project-specific value; client asks; agent judges it useful.
+
+Do NOT: require for every site; treat absence as blocker; treat reports as legal opinions; use tool scores as primary readiness criterion; buy paid plans without explicit user permission.
+
+PR-CY does not replace SEO audit. Auditikk does not replace legal/security audit.
+
+## Status vocabulary (mandatory)
+
+`PASS` | `NOT APPLICABLE` | `NEEDS OWNER DATA` | `NEEDS OWNER ACTION` | `NEEDS REVIEW` | `NEEDS LEGAL REVIEW` | `BLOCKED`
+
+`BLOCKED` only when the issue truly prevents safe/lawful launch of a specific function or production mode.
+
+Final verdict ONLY: `READY FOR TECHNICAL RELEASE` | `READY WITH OWNER ACTIONS` | `NEEDS REVIEW` | `BLOCKED`
+
+Never write `PRODUCTION READY` if any item is `BLOCKED`.  
+Never claim full legal compliance from automated checks. Automated audit ≠ legal opinion.
+
+## Never invent owner/legal data
+
+Do NOT invent: ИНН, ОГРН/ОГРНИП, FIO, ООО/ИП, address, bank details, Roskomnadzor number, licenses, certificates, real reviews, guarantees, prices, owner phone/email, legal status.
+
+Missing → `NEEDS OWNER DATA`. If mandatory for the release mode → may escalate to `BLOCKED`.
+
+## Russian law baseline (as of work date)
+
+1. **152-FZ** — if PD collected/processed  
+2. Separate consent when consent is the legal basis (incl. rules requiring separation from other confirmations)  
+3. Privacy policy reflecting real processing  
+4. Roskomnadzor notification — owner decision  
+5. Localization of primary collection for RF citizens  
+6. Cross-border transfers  
+7. Russian-language public information (incl. rules from 01.03.2026 where applicable)  
+8. **2300-1** — if consumer offers  
+9. **38-FZ** / ERID — only if real advertising  
+10. **54-FZ** — only if payments + receipt duty  
+11. Industry rules — if project requires  
+
+## Personal data / cookies
+
+Map forms/fields, purposes, bases, storage, retention, recipients, processors. Consent (if used): not pre-checked; explicit action; policy link; separated when required; matches code. PD collected → `/privacy` (or equivalent) with real operator/processing facts. Never invent operator data.
+
+Cookies: inventory ESSENTIAL/ANALYTICS/MARKETING/FUNCTIONAL/OTHER. Non-essential after required consent. Essential-only → no pointless complex banner.
+
+## Client / Owner Actions (mandatory output)
+
+For each site, produce project-specific **CLIENT / OWNER ACTIONS**: what cannot be done by coding alone (legal status, ИНН, address, RKN notice, retention, real prices/reviews/photos, offer if needed, online cash register if needed, ad marking if needed, etc.). Do not paste a generic identical list for every project — derive from actual flow.
+
+Also record: Owner Data Required, Legal Review Required, Blockers.
+
+## Technical audit (Cursor, mandatory independently)
+
+HTTPS, redirects, robots, sitemap, canonical, metadata, headings, indexability, broken links, Schema (factual only — no fake ratings), OG, performance, mobile, a11y, forms, validation, cookies, security headers, authz, dependency vulns, secrets, production config.
+
+Security/SEO/a11y baselines remain mandatory regardless of optional tools.
+
+## RELEASE_AUDIT.md
+
+Required for serious production web projects. Core sections: Legal applicability, PD/152-FZ, Consent, Privacy, Roskomnadzor, Localization, Cross-border, Russian Language, Consumer Protection, Advertising, Payments, Security, SEO, Accessibility, External Services, Client/Owner Actions, Owner Data Required, Legal Review Required, Blockers, Final Verdict.
+
+Optional section: Additional Automated Audits (PR-CY / Auditikk = NOT RUN | RUN). Absence must not change Final Verdict if mandatory gates were completed otherwise.
+
+## Agent behavior
+
+- Analyze actual code + architecture + business flow; update audit when facts change.
+- New web project: `tools/init-web-project-compliance.ps1 -ProjectPath ...`
+- Nested repos need their own copy of this rule.
+- No deploy/push/production restart/DB migration unless user asks.
+- Sales Agent production: no runtime/.env/scheduler/systemd/DB/deploy changes unless asked.
+- Never print secrets from `.env*` / credentials / keys / tokens.
