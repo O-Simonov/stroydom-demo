@@ -8,18 +8,28 @@ GitHub: [O-Simonov/stroydom-demo](https://github.com/O-Simonov/stroydom-demo)
 
 ---
 
+## Portfolio demo
+
+- **Live:** https://stroydom-project.ru
+- **Тип:** корпоративный сайт + CRM (демонстрационный проект)
+- **Ключевой стек:** Next.js 15, React 19, TypeScript, Tailwind, Prisma, SQLite, Zod
+- **Кейс:** [`docs/PORTFOLIO_CASE.md`](./docs/PORTFOLIO_CASE.md) · карточка: [`docs/PORTFOLIO_CARD.md`](./docs/PORTFOLIO_CARD.md)
+
+На live demo включён `SITE_MODE=demo`: публичная форма **не сохраняет** персональные данные и не вызывает Telegram. Архитектура production-режима (запись в БД → CRM → Telegram без ПДн в тексте) реализована в коде.
+
 ## О проекте
 
-Смоделирован типичный малый бизнес: строительство загородных домов под ключ. Сайт не только показывает услуги — он принимает обращение, сохраняет его и отдаёт менеджеру в работу.
+Смоделирован типичный малый бизнес: строительство загородных домов под ключ. Сайт презентует услуги, принимает обращение и — в рабочем (production) режиме — отдаёт его менеджеру в закрытую CRM.
 
-Это **демонстрационный проект для портфолио**, не сайт реальной компании. Контент, контакты и заявки — тестовые.
+Это **демонстрационный проект для портфолио**, не сайт реальной компании. Контент и сценарии — демонстрационные.
 
 ## Что получает бизнес
 
-Посетитель выбирает параметры дома и оставляет контакты. Заявка сразу попадает в базу, менеджер получает уведомление в Telegram, обращение появляется в закрытой CRM — и дальше ведётся по статусам, без Excel и переписок в мессенджере.
+Посетитель выбирает параметры дома и оставляет контакты. В production-режиме заявка попадает в базу, менеджер может получить уведомление в Telegram (без ПДн в тексте сообщения), обращение появляется в CRM и ведётся по статусам.
 
 ```
-Посетитель → сайт → заявка → Telegram → CRM → обработка лида
+DEMO:     Посетитель → сайт → simulated response (без записи ПДн)
+PRODUCTION: Посетитель → сайт → API → SQLite → CRM (+ Telegram id)
 ```
 
 ## Возможности
@@ -35,8 +45,8 @@ GitHub: [O-Simonov/stroydom-demo](https://github.com/O-Simonov/stroydom-demo)
 ### Back-end
 
 - `POST /api/leads` с серверной валидацией;
-- хранение заявок в базе;
-- уведомление в Telegram (сбой мессенджера не теряет заявку).
+- режимы `SITE_MODE=demo|production`;
+- в production: хранение заявок в базе и best-effort Telegram (сбой мессенджера не откатывает заявку).
 
 ### Mini-CRM
 
@@ -55,27 +65,16 @@ GitHub: [O-Simonov/stroydom-demo](https://github.com/O-Simonov/stroydom-demo)
 
 ## Архитектура
 
-```
-Visitor
-   ↓
-Next.js Landing
-   ↓
-POST /api/leads
-   ↓
-Prisma → SQLite
-   ↓
-Telegram notification
-   ↓
-Mini-CRM /leads
-```
-
-Размещение:
+Production-контур (когда `SITE_MODE=production`):
 
 ```
-Internet → HTTPS → Nginx → Next.js (127.0.0.1:3000) → Prisma → SQLite
+Visitor → Next.js → POST /api/leads → Prisma/SQLite → Mini-CRM /leads
+                                         ↘ Telegram (id + ссылка CRM)
 ```
 
-Подробности деплоя: [`DEPLOY_BEGET.md`](./DEPLOY_BEGET.md).
+Размещение (без деталей сервера в публичных материалах): HTTPS → Nginx → Next.js → Prisma → SQLite.
+
+Подробности деплоя: [`DEPLOY_VPS.md`](./DEPLOY_VPS.md). Полный portfolio case: [`docs/PORTFOLIO_CASE.md`](./docs/PORTFOLIO_CASE.md).
 
 ## Стек
 
@@ -127,7 +126,8 @@ Mini-CRM показана на скриншотах ниже; production CRM з�
 
 ![CRM на мобильном](./docs/screenshots/08-crm-mobile.png)
 
-Полный чеклист кадров: [`SCREENSHOTS.md`](./SCREENSHOTS.md). Разбор кейса: [`CASE.md`](./CASE.md) · короткая карточка: [`PORTFOLIO.md`](./PORTFOLIO.md)
+Чеклист кадров: [`SCREENSHOTS.md`](./SCREENSHOTS.md) · план: [`docs/PORTFOLIO_SCREENSHOTS.md`](./docs/PORTFOLIO_SCREENSHOTS.md).
+Кейс: [`docs/PORTFOLIO_CASE.md`](./docs/PORTFOLIO_CASE.md) · также [`CASE.md`](./CASE.md) · [`PORTFOLIO.md`](./PORTFOLIO.md)
 
 ## Локальный запуск
 
