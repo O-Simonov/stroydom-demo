@@ -3,12 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-type CrmHeaderProps = {
-  onRefresh?: () => void;
-  isRefreshing?: boolean;
-};
-
-export function CrmHeader({ onRefresh, isRefreshing = false }: CrmHeaderProps) {
+export function CrmHeader() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -31,29 +26,17 @@ export function CrmHeader({ onRefresh, isRefreshing = false }: CrmHeaderProps) {
           СТРОЙДОМ
         </p>
         <h1 className="mt-1 font-[family-name:var(--font-display)] text-2xl text-[var(--ink)] sm:text-3xl">
-          Учёт заявок
+          Mini CRM
         </h1>
       </div>
-      <div className="flex items-center gap-2">
-        {onRefresh ? (
-          <button
-            type="button"
-            onClick={onRefresh}
-            disabled={isRefreshing}
-            className="rounded-full border border-[var(--line)] px-4 py-2 text-sm font-medium text-[var(--ink)] transition hover:bg-[var(--sand)] disabled:opacity-60"
-          >
-            {isRefreshing ? "Обновляем..." : "Обновить"}
-          </button>
-        ) : null}
-        <button
-          type="button"
-          onClick={logout}
-          disabled={loading}
-          className="rounded-full border border-[var(--line)] px-4 py-2 text-sm font-medium text-[var(--ink)] transition hover:bg-[var(--sand)] disabled:opacity-60"
-        >
-          {loading ? "Выходим..." : "Выйти"}
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={logout}
+        disabled={loading}
+        className="rounded-full border border-[var(--line)] px-4 py-2 text-sm font-medium text-[var(--ink)] transition hover:bg-[var(--sand)] disabled:opacity-60"
+      >
+        {loading ? "Выходим..." : "Выйти"}
+      </button>
     </div>
   );
 }

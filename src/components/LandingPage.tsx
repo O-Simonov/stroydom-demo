@@ -19,11 +19,7 @@ function scrollToId(id: string) {
   el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-type LandingPageProps = {
-  siteMode: "demo" | "production";
-};
-
-export function LandingPage({ siteMode }: LandingPageProps) {
+export function LandingPage() {
   const [calculatorValues, setCalculatorValues] = useState<CalculatorValues | null>(
     null,
   );
@@ -62,9 +58,9 @@ export function LandingPage({ siteMode }: LandingPageProps) {
         />
         <Portfolio />
         <CustomerValue />
-        <LeadForm calculatorValues={calculatorValues} siteMode={siteMode} />
+        <LeadForm calculatorValues={calculatorValues} />
       </main>
-      <Footer siteMode={siteMode} />
+      <Footer />
     </>
   );
 }
